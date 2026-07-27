@@ -1,4 +1,4 @@
-# Beleqet Pay — Monorepo
+++++++++++++++++++++++++++++++++++++++++++++++++++++++# Beleqet Pay — Monorepo
 
 A payment gateway platform scaffold: NestJS core API with a double-entry
 ledger, Chapa (Telebirr/CBE Birr/Amole) + Stripe (international USD)
