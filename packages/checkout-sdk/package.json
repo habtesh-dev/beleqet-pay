@@ -1,0 +1,9 @@
+{
+  "name": "@beleqet/checkout-sdk",
+  "version": "1.0.0",
+  "description": "Embed Beleqet Pay checkout into any web or mobile app.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc -p tsconfig.json" },
+  "devDependencies": { "typescript": "^5.5.4" }
+}

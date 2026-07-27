@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Beleqet Pay Merchant",
+    "slug": "beleqet-pay-merchant",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": { "backgroundColor": "#065F46" },
+    "android": { "package": "com.beleqet.pay.merchant" },
+    "ios": { "bundleIdentifier": "com.beleqet.pay.merchant" }
+  }
+}

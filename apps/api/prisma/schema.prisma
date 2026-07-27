@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TxStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+  DISPUTED
+}
+
+enum TxProvider {
+  CHAPA
+  STRIPE
+}
+
+enum PayoutStatus {
+  SCHEDULED
+  PROCESSING
+  PAID
+  FAILED
+}
+
+model Merchant {
+  id               String    @id @default(uuid())
+  businessName     String
+  tinNumber        String?
+  email            String    @unique
+  country          String    @default("ET")
+  kycStatus        String    @default("PENDING")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  apiKeys          ApiKey[]
+  transactions     Transaction[]
+  ledgerEntries    AccountLedger[]
+  payouts          Payout[]
+  webhookEndpoints WebhookEndpoint[]
+  disputes         Dispute[]
+}
+
+model ApiKey {
+  id         String   @id @default(uuid())
+  merchantId String
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  keyHash    String   @unique
+  keyPrefix  String
+  mode       String   @default("test")
+  revoked    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model Transaction {
+  id             String     @id @default(uuid())
+  txRef          String     @unique
+  merchantId     String
+  merchant       Merchant   @relation(fields: [merchantId], references: [id])
+  amount         Decimal    @db.Decimal(14, 2)
+  currency       String     @default("ETB")
+  provider       TxProvider
+  status         TxStatus   @default(PENDING)
+  metadata       Json?
+  providerRef    String?
+  idempotencyKey String?    @unique
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  ledgerEntries  AccountLedger[]
+  disputes       Dispute[]
+}
+
+model AccountLedger {
+  id            String      @id @default(uuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  merchantId    String
+  merchant      Merchant    @relation(fields: [merchantId], references: [id])
+  account       String
+  direction     String
+  amount        Decimal     @db.Decimal(14, 2)
+  currency      String
+  createdAt     DateTime    @default(now())
+}
+
+model Payout {
+  id          String       @id @default(uuid())
+  merchantId  String
+  merchant    Merchant     @relation(fields: [merchantId], references: [id])
+  amount      Decimal      @db.Decimal(14, 2)
+  currency    String
+  status      PayoutStatus @default(SCHEDULED)
+  destination Json
+  scheduledAt DateTime     @default(now())
+  paidAt      DateTime?
+}
+
+model WebhookEndpoint {
+  id         String   @id @default(uuid())
+  merchantId String
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  url        String
+  secret     String
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
+
+model WebhookAuditLog {
+  id         String     @id @default(uuid())
+  provider   TxProvider
+  txRef      String?
+  ip         String?
+  verified   Boolean
+  rawPayload Json
+  receivedAt DateTime   @default(now())
+}
+
+model Dispute {
+  id            String      @id @default(uuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  merchantId    String
+  merchant      Merchant    @relation(fields: [merchantId], references: [id])
+  reason        String
+  status        String      @default("OPEN")
+  evidence      Json?
+  createdAt     DateTime    @default(now())
+}
+
+model FraudLog {
+  id        String   @id @default(uuid())
+  txRef     String
+  riskScore Int
+  signals   Json
+  decision  String
+  createdAt DateTime @default(now())
+}
+
+model AuditTrail {
+  id        String   @id @default(uuid())
+  actor     String
+  action    String
+  entity    String
+  entityId  String
+  diff      Json?
+  createdAt DateTime @default(now())
+}

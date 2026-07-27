@@ -1,0 +1,10 @@
+{
+  "name": "beleqet-pay-universe",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": ["apps/api", "apps/dashboard", "apps/mobile", "packages/checkout-sdk"],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test:e2e --workspace=apps/api"
+  }
+}
